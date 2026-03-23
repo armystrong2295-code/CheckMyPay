@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check My Pay</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  margin: 0;
+  padding: 15px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: #1e293b;
+  padding: 18px;
+  border-radius: 12px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.tagline {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.subtag {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 20px;
+}
+
+input, select {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: none;
+  font-size: 18px;
+}
+
+button {
+  width: 100%;
+  padding: 16px;
+  background: #22c55e;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.results {
+  margin-top: 20px;
+  background: #0f172a;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.big {
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 15px;
+  color: #22c55e;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.disclaimer {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 15px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>💰 Check My Pay</h1>
+
+<div class="tagline">Stop guessing your paycheck.</div>
+<div class="subtag">Enter your hours and get your take-home pay instantly.</div>
+
+<input type="number" id="rate" placeholder="Hourly Wage ($)">
+<input type="number" id="hours" placeholder="Regular Hours">
+<input type="number" id="otHours" placeholder="Overtime Hours">
+
+<select id="otType">
+  <option value="1.5">Time and a Half (1.5x)</option>
+  <option value="2">Double Time (2.0x)</option>
+</select>
+
+<select id="payType">
+  <option value="1">Weekly</option>
+  <option value="2">Bi-Weekly</option>
+</select>
+
+<select id="state"></select>
+
+<input type="number" id="deductions" placeholder="Deductions ($ optional)">
+
+<button onclick="calculate()">Calculate</button>
+
+<div class="results" id="results" style="display:none;">
+  <div class="big" id="netPay"></div>
+
+  <div class="row"><span>Before taxes</span><span id="gross"></span></div>
+  <div class="row"><span>Taxes taken</span><span id="taxes"></span></div>
+  <div class="row"><span>Deductions</span><span id="ded"></span></div>
+  <div class="row"><span>Overtime earned</span><span id="otPay"></span></div>
+
+  <div class="disclaimer">
+    Estimates based on typical tax rates. Actual pay may vary.
+  </div>
+</div>
+
+</div>
+
+<script>
+const states = {
+"Alabama": 0.21, "Alaska": 0.18, "Arizona": 0.22, "Arkansas": 0.23,
+"California": 0.25, "Colorado": 0.22, "Connecticut": 0.23, "Delaware": 0.22,
+"Florida": 0.20, "Georgia": 0.22, "Hawaii": 0.24, "Idaho": 0.22,
+"Illinois": 0.22, "Indiana": 0.21, "Iowa": 0.22, "Kansas": 0.23,
+"Kentucky": 0.21, "Louisiana": 0.21, "Maine": 0.23, "Maryland": 0.23,
+"Massachusetts": 0.23, "Michigan": 0.21, "Minnesota": 0.24, "Mississippi": 0.21,
+"Missouri": 0.22, "Montana": 0.23, "Nebraska": 0.23, "Nevada": 0.20,
+"New Hampshire": 0.20, "New Jersey": 0.24, "New Mexico": 0.22,
+"New York": 0.25, "North Carolina": 0.21, "North Dakota": 0.22,
+"Ohio": 0.22, "Oklahoma": 0.22, "Oregon": 0.25, "Pennsylvania": 0.22,
+"Rhode Island": 0.23, "South Carolina": 0.22, "South Dakota": 0.20,
+"Tennessee": 0.20, "Texas": 0.20, "Utah": 0.21, "Vermont": 0.24,
+"Virginia": 0.22, "Washington": 0.20, "West Virginia": 0.22,
+"Wisconsin": 0.22, "Wyoming": 0.20
+};
+
+const stateSelect = document.getElementById("state");
+
+for (let state in states) {
+  let option = document.createElement("option");
+  option.value = states[state];
+  option.textContent = state;
+  stateSelect.appendChild(option);
+}
+
+function calculate() {
+  let rate = +document.getElementById("rate").value || 0;
+  let hours = +document.getElementById("hours").value || 0;
+  let otHours = +document.getElementById("otHours").value || 0;
+  let otMultiplier = +document.getElementById("otType").value;
+  let taxRate = +document.getElementById("state").value;
+  let deductions = +document.getElementById("deductions").value || 0;
+
+  let regular = rate * hours;
+  let overtime = rate * otMultiplier * otHours;
+  let gross = regular + overtime;
+
+  let taxes = gross * taxRate;
+  let net = gross - taxes - deductions;
+
+  document.getElementById("results").style.display = "block";
+  document.getElementById("netPay").innerText = "$" + net.toFixed(2) + " take-home";
+  document.getElementById("gross").innerText = "$" + gross.toFixed(2);
+  document.getElementById("taxes").innerText = "-$" + taxes.toFixed(2);
+  document.getElementById("ded").innerText = "-$" + deductions.toFixed(2);
+  document.getElementById("otPay").innerText = "$" + overtime.toFixed(2);
+}
+</script>
+
+</body>
+</html>
